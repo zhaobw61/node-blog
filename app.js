@@ -1,14 +1,26 @@
-const http = require('http');
-const querystring = require('querystring');
+const handleBlogRouter = require('./src/router/blog');
+const handleUserRouter = require('./src/router/user');
 
-const server =http.createServer((req,res)=>{
-  console.log('method: ',req.method);
-  var url = req.url;
-  console.log(url);
-  let queryStr = querystring.parse(url.split('?')[1]);
-  console.log('queryStr: ',queryStr);
-  console.log('req.query: ',req.query);
-  res.end('hello world!');
-})
-server.listen(8000);
-console.log('server ok!');
+const serverHandle = (req,res)=>{
+  res.setHeader('Content-type','application/json');
+  const url = req.url;
+  req.path = url.split('?')[0];
+  // 处理blog路由
+  const blogData = handleBlogRouter(req,res);
+  if(blogData){
+    res.end(JSON.stringify(blogData));
+    return;
+  }
+  // 处理user路由
+  const userData = handleUserRouter(req,res);
+  if(userData){
+    res.end(JSON.stringify(userData));
+    return;
+  }
+  // 没有命中路由
+  res.writeHead(404,{"Content-type":"text/plain"});
+  res.write("404 Not Found\n");
+  res.end();
+}
+
+module.exports = serverHandle;
