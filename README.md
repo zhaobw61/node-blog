@@ -56,3 +56,37 @@
 - 解除安全模式
 
 `SET SQL_SAFE_UPDATES = 0;`
+
+### cookie
+
+- 定义： 
+
+1.存储在浏览器的一段字符串（最大5KB）
+
+2.跨域不共享
+
+3.格式：k1=v1;k2=v2;k3=v3;因此可以存储结构化数据
+
+4.每次发送http请求，会将请求域cookie一起发送给server
+
+5.server可以修改cookie并返回给浏览器
+
+6.浏览器可以通过js修改cookie
+
+- JS 操作 cookie
+
+1.JS修改cookie:document.cookie = value // 累加的过程，不是直接赋值
+
+2.查看cookie：在控制台的application、在network
+
+3.http-only:服务器可以限制客户端的修改
+
+4.过期时间：设置expires
+
+5.res.setHeader('Set-Cookie',`username=${data.username}; path=/; httpOnly; expires=${getCookieExpires()}`)
+
+### session
+
+- 定义：cookie中存储userid，server端存储用户信息。(因为cookie会暴露用户的信息)
+
+1.
