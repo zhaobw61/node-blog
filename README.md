@@ -21,6 +21,38 @@
 > get 请求数据
 > post 客户端要像服务端传递数据。浏览器不能直接模拟请求需要手写JS或者postman
 
-#### 搭建开发环境
+### mysql 常用语句
 
-#### 开发接口
+- 注释
+
+` -- shwo tables;`
+
+- 增加
+
+`insert into users(username,password,realname)values('zhangsan','123','张三');`
+
+- 查询
+
+`select * from users` 尽量不要使用*，可能会降低性能
+
+`select id,username from users`
+
+`select * from users where username ='zhangsan' and|or password ='123'`
+
+`select * from users where username like 'zhang'`
+
+- 排序
+
+`select * from users where username ='zhangsan' order by id`
+
+- 改值
+
+`update users set realname='李四2' where username= 'lisi'`
+
+- 删除
+
+`delete from users where username='lisi'`
+
+- 解除安全模式
+
+`SET SQL_SAFE_UPDATES = 0;`
