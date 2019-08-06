@@ -1,4 +1,6 @@
 const querystring = require('querystring');
+const {get,set} = require('./src/db/redis');
+const { access } = require('./src/utils/log');
 const handleBlogRouter = require('./src/router/blog');
 const handleUserRouter = require('./src/router/user');
 
@@ -11,7 +13,7 @@ const getCookieExpires = () =>{
 }
 
 // session 数据
-const SESSION_DATA = {};
+// const SESSION_DATA = {};
 
 // 用于处理post data
 const getPostData = (req) => {
@@ -42,6 +44,10 @@ const getPostData = (req) => {
 }
 
 const serverHandle = (req,res)=>{
+  // 记录 access log
+  access(
+    `${req.method} -- ${req.url} -- ${req.headers['user-agent']} -- ${Date.now()}`
+  )
   res.setHeader('Content-type','application/json');
 
   const url = req.url;
@@ -63,20 +69,40 @@ const serverHandle = (req,res)=>{
   })
 
   // 解析 session
+  // let needSetCookie = false;
+  // let userId =  req.cookie.userId
+  // if(userId){
+  //   if(!SESSION_DATA[userId]){
+  //     SESSION_DATA[userId] = {};
+  //   }
+  // }else{
+  //   needSetCookie = true;
+  //   userId = `${Date.now()}_${Math.random()}`;
+  //   SESSION_DATA[userId] = {};
+  // }
+  // req.session = SESSION_DATA[userId];
+  
+  // 解析 session （使用redis）
   let needSetCookie = false;
-  let userId =  req.cookie.userId
-  if(userId){
-    if(!SESSION_DATA[userId]){
-      SESSION_DATA[userId] = {};
-    }
-  }else{
+  let userId =  req.cookie.userId;
+  if(!userId){
     needSetCookie = true;
     userId = `${Date.now()}_${Math.random()}`;
-    SESSION_DATA[userId] = {};
+    set(userId,{})
   }
-  req.session = SESSION_DATA[userId];
-  // 处理postData
-  getPostData(req).then(postData => {
+  // 获取session
+  req.sessionId = userId;
+  get(req.sessionId).then(sessionData => {
+    if(sessionData == null){ //感觉没有必要，从一个口进入。除非有人手动改
+      set(req.sessionId,{});
+      req.session = {};
+    }else{
+      req.session = sessionData;
+    }
+
+    // 处理postData
+    return getPostData(req)
+  }).then(postData => {
     req.body = postData;
     // 处理blog路由
     // const blogData = handleBlogRouter(req,res);
